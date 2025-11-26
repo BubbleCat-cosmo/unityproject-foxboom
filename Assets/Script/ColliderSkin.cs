@@ -5,47 +5,52 @@ public class ColliderSkin : MonoBehaviour
     public float skinWidth = 0.04f; // 皮肤宽度（检测距离）
     public LayerMask groundLayer; // 地面层级
 
-    private BoxCollider2D boxCollider;
-    private bool isGrounded = false;
+    private BoxCollider2D col;
+
+    private bool isAdjust = false;
 
     void Start()
     {
-        boxCollider = GetComponent<BoxCollider2D>();
+        col = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        // 检测地面
-        CheckGround();
+        // 是否调整
+        isAdjust = AdjustCheck();
+
+        // 调试信息
+        //Debug.Log("isAdjust=" + isAdjust);
+
         // 应用 Skin Width
         ApplySkinWidth();
 
     }
 
-    private void CheckGround()
+    private bool AdjustCheck()
     {
-        // 计算碰撞体底部的位置
-        Vector2 colliderBottom = (Vector2)transform.position + boxCollider.offset -
-                                new Vector2(0, boxCollider.size.y / 2);
-        // 射线检测地面
-        RaycastHit2D hit = Physics2D.Raycast(colliderBottom, Vector2.down, skinWidth, groundLayer);
-        isGrounded = (hit.collider != null);
+        Bounds bounds = col.bounds;
+        Vector2 origin = new Vector2(bounds.center.x,bounds.min.y);
+        Vector2 size = new Vector2(bounds.size.x, skinWidth);
 
-        // 调试提示
-        Debug.DrawRay(colliderBottom, Vector2.down * skinWidth,
-                     isGrounded ? Color.green : Color.red);
+        RaycastHit2D hit = Physics2D.BoxCast(origin, size, 0, Vector2.down, 0, groundLayer);
 
-        // Debug.Log("isGrounded="+isGrounded);
+        if (hit.collider != null)
+        {
+            return hit.distance < skinWidth;
+        }
+        return false;
+        
     }
 
     private void ApplySkinWidth()
     {
-        if (isGrounded)
+        if (isAdjust)
         {
             // 获取地面信息
-            Vector2 colliderBottom = (Vector2)transform.position + boxCollider.offset -
-                                   new Vector2(0, boxCollider.size.y / 2);
+            Vector2 colliderBottom = (Vector2)transform.position + col.offset -
+                                   new Vector2(0, col.size.y / 2);
 
             RaycastHit2D hit = Physics2D.Raycast(
                 colliderBottom,
@@ -60,11 +65,11 @@ public class ColliderSkin : MonoBehaviour
                 Vector2 newPosition = new Vector2(transform.position.x, targetY);
                 // 平滑应用
                 transform.position = Vector2.Lerp(transform.position, newPosition, 0.5f);
+
                 // 调试信息
-                Debug.Log("调整位置");
+                //Debug.Log("调整位置");
             }
         }
     }
-
-
 }
+
