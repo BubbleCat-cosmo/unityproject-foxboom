@@ -4,16 +4,23 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 4f;
+    public LayerMask groundLayer;
 
     private Rigidbody2D rb;
     private Animator animator;
 
     private float playerInputX;
+    private bool isWalled = false; 
+    private float checkWidth = 0.05f;
+    
+
+    private Collider2D col;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        col = GetComponent<Collider2D>();
     }
 
     private void Update()
@@ -23,6 +30,9 @@ public class PlayerMovement : MonoBehaviour
         playerInputX = Mathf.Min(playerInputX, 1);
         // ´¦Àí´ý»ú-ÒÆ¶¯ÇÐ»»¶¯»­
         HandleAnimation();
+        // Ç½±Ú¼ì²â
+        isWalled = CheckWall();
+        Debug.Log("isWalled=" + isWalled);
     }
 
     private void FixedUpdate()
@@ -32,11 +42,34 @@ public class PlayerMovement : MonoBehaviour
         Move();
     }
 
+    private bool CheckWall()
+    {
+        Bounds bound = col.bounds;
+        Vector2 rightOrigin = new Vector2(bound.max.x, bound.center.y);
+        Vector2 leftOrigin = new Vector2(bound.min.x, bound.center.y);
+        Vector2 size = new Vector2(checkWidth * 2, bound.size.y);
+
+        RaycastHit2D rightHit = Physics2D.BoxCast(rightOrigin, size, 0, Vector2.right, 0, groundLayer);
+        RaycastHit2D leftHit = Physics2D.BoxCast(leftOrigin, size, 0, Vector2.left, 0, groundLayer);
+
+        if((rightHit.collider != null && playerInputX >= 1)||(leftHit.collider != null && playerInputX <= -1))
+        {
+            return true;
+        }
+        return false;
+    }
     private void Move()
     {
-        float curVelocityY = rb.velocity.y;
-        Vector2 velocity = new Vector2(playerInputX * moveSpeed, curVelocityY);
-        rb.velocity = velocity;
+        if (!isWalled)
+        {
+            float curVelocityY = rb.velocity.y;
+            Vector2 velocity = new Vector2(playerInputX * moveSpeed, curVelocityY);
+            rb.velocity = velocity;
+        }
+        else
+        {
+            return;
+        }
     }
     private void HandleAnimation()
     {
