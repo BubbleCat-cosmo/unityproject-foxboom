@@ -49,6 +49,7 @@ public class PlayerJump : MonoBehaviour
             isTryJump = false;
             if (curJumpCount > 0)
             {
+                curJumpCount--;
                 // Debug.Log("ÌøÔ¾");
                 Vector2 jumpDirection = Vector2.up;
                 float jumpSpeed = Mathf.Sqrt(2 * jumpAcceleration * jumpHeight);
@@ -60,7 +61,6 @@ public class PlayerJump : MonoBehaviour
                 }
                 velocity += jumpSpeed * jumpDirection;
                 rb.velocity = velocity;
-                curJumpCount--;
             }
             else
             {
@@ -73,7 +73,7 @@ public class PlayerJump : MonoBehaviour
     {
         if (isGrounded)
         {
-            curJumpCount = jumpCount;
+            curJumpCount = jumpCount-1;
         }
     }
 }
