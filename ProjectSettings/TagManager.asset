@@ -12,12 +12,12 @@ TagManager:
   - Water
   - UI
   - 
-  - 
-  - groundLayer
-  - backgroung
-  - 
-  - 
-  - 
+  - Player
+  - GroundLayer
+  - Backgroung
+  - MonsterBody
+  - MonsterAttack
+  - MonsterSensor
   - 
   - 
   - 
